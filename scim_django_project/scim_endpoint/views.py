@@ -3,7 +3,10 @@ from django.views import View
 from django.views.decorators.http import require_GET
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.cache import never_cache
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+
 from typing import Tuple, Union
 import jwt
 import json
@@ -12,7 +15,7 @@ from .models import Employee
 
 JWT_TOKEN_PAYLOAD = 'secret'
 
-
+@method_decorator(never_cache, name="dispatch")
 class ScimService(View):
     """
     View for Users provisioning
@@ -164,6 +167,7 @@ class ScimService(View):
         
 
 @require_GET
+@never_cache
 def get_scim_token(request) -> JsonResponse:
     token = jwt.encode({"customer_id": JWT_TOKEN_PAYLOAD}, settings.SECRET_KEY, algorithm="HS256")
     return JsonResponse({"token": token})
